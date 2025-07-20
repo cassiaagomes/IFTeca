@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "26570234375",
+    "project_id": "ifteca-c9b9f",
+    "storage_bucket": "ifteca-c9b9f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:26570234375:android:07f5b5cb16ecc9af4928a2",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCaSwQSs7dOtXjG7aKYEaFepC1YjmDl1I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
