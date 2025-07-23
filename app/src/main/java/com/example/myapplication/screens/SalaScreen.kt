@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +33,7 @@ import java.util.Locale
 fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = viewModel()) {
     val context = LocalContext.current
     val verdeEscuro = Color(0xFF1B5E20)
+    val vermelhoClaro= Color(0xFFFF6666)
 
     val salas by salasViewModel.salas.collectAsStateWithLifecycle()
     val reservationResult by salasViewModel.reservationResult.collectAsStateWithLifecycle()
@@ -48,7 +49,7 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
 
     LaunchedEffect(reservationResult) {
         reservationResult?.let { result ->
-            val message = if(result.isSuccess) "Reservado com Sucesso!" else result.exceptionOrNull()?.message ?: "Erro desconhecido"
+            val message = if(result.isSuccess) "Reservado com sucesso!" else result.exceptionOrNull()?.message ?: "Erro desconhecido"
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
             salasViewModel.clearReservationResult()
         }
@@ -60,7 +61,10 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
                 title = { Text("Salas", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar",
+                            tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = verdeEscuro)
@@ -73,23 +77,26 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
             .background(Color(0xFFF5F5F5))
         ) {
             Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Olá,", fontSize = 18.sp)
+                Text("Olá,", fontSize = 18.sp, color= Color.Black)
                 Spacer(modifier = Modifier.weight(1f))
                 ExposedDropdownMenuBox(expanded = dropdownAberto, onExpandedChange = { dropdownAberto = !dropdownAberto }) {
                     TextField(
                         value = turnoSelecionado, onValueChange = {}, readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownAberto) },
-                        modifier = Modifier.menuAnchor(),
+                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
-                            focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent
+                            focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black
                         )
                     )
-                    ExposedDropdownMenu(expanded = dropdownAberto, onDismissRequest = { dropdownAberto = false }) {
+                    ExposedDropdownMenu(expanded = dropdownAberto, onDismissRequest = { dropdownAberto = false },  modifier = Modifier.background(Color.White)) {
                         turnos.forEach { turno ->
-                            DropdownMenuItem(text = { Text(turno) }, onClick = {
+                            DropdownMenuItem(text = { Text(turno, color = Color.Black) }, onClick = {
                                 turnoSelecionado = turno
                                 dropdownAberto = false
+
                             })
                         }
                     }
@@ -126,7 +133,7 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
         val hojeFormatado = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
         AlertDialog(
             onDismissRequest = { salaParaConfirmar = null },
-            title = { Text("Quer Confirmar a reserva?") },
+            title = { Text("Quer confirmar a reserva?") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Sala: ${sala.nome}", fontWeight = FontWeight.Bold)
@@ -138,11 +145,12 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
                 Button(onClick = {
                     salasViewModel.reservarSala(sala.id, turnoSelecionado)
                     salaParaConfirmar = null
-                }, colors = ButtonDefaults.buttonColors(containerColor = verdeEscuro)) { Text("Confirmar") }
+                }, colors = ButtonDefaults.buttonColors(containerColor = verdeEscuro)) { Text("Confirmar", color= Color.White) }
             },
             dismissButton = {
-                Button(onClick = { salaParaConfirmar = null }, colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) { Text("Cancelar") }
-            }
+                Button(onClick = { salaParaConfirmar = null }, colors = ButtonDefaults.buttonColors(containerColor = vermelhoClaro)) { Text("Cancelar", color= Color.White) }
+            },
+            containerColor = Color.DarkGray
         )
     }
 }
@@ -160,8 +168,8 @@ fun SalaCard(sala: Sala, onClick: () -> Unit) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(sala.nome, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text("Vagas", fontSize = 14.sp, color = Color.Gray)
+            Text(sala.nome, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
+            Text("Vagas", fontSize = 14.sp, color = Color.Black)
             Text(
                 text = "${sala.vagasOcupadas}/${sala.vagasMaximas}",
                 color = corVagas,
@@ -169,9 +177,9 @@ fun SalaCard(sala: Sala, onClick: () -> Unit) {
                 fontSize = 16.sp
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.AccessTime, contentDescription = "Duração", modifier = Modifier.size(16.dp))
+                Icon(Icons.Default.AccessTime, contentDescription = "Duração", modifier = Modifier.size(16.dp), tint = Color.DarkGray)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(sala.duracao, fontSize = 14.sp)
+                Text(sala.duracao, fontSize = 14.sp, color = Color.DarkGray)
             }
         }
     }
