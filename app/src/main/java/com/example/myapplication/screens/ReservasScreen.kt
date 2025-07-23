@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.myapplication.data.MinhaReserva
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +34,7 @@ fun ReservasScreen(navController: NavController, viewModel: ReservasViewModel = 
                 title = { Text("Reservas", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White) // Corrigindo para ArrowBack atualizado
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = verdeEscuro)
@@ -52,7 +52,12 @@ fun ReservasScreen(navController: NavController, viewModel: ReservasViewModel = 
                 }
             } else {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Essas são suas reservas:", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "Essas são suas reservas:",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.Black
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(minhasReservas, key = { it.id }) { reserva ->
@@ -102,12 +107,12 @@ fun ReservaItem(reserva: MinhaReserva, onCancelClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Sala", color = Color.Gray, fontSize = 12.sp)
-                Text(reserva.nomeSala, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Sala", color = Color.Black, fontSize = 12.sp)
+                Text(reserva.nomeSala, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.DarkGray)
             }
             Column(modifier = Modifier.weight(1.5f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Data", color = Color.Gray, fontSize = 12.sp)
-                Text("${reserva.data} (${reserva.turno})", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Data", color = Color.Black, fontSize = 12.sp)
+                Text("${reserva.data} (${reserva.turno})", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.DarkGray)
             }
             IconButton(onClick = onCancelClick) {
                 Icon(Icons.Default.Delete, contentDescription = "Cancelar Reserva", tint = Color.Red)
