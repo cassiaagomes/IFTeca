@@ -1,6 +1,7 @@
 package com.example.myapplication.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,16 +18,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myapplication.R
 import com.example.myapplication.data.Sala
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.example.myapplication.navigation.AppRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,23 +36,13 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
     val verdeEscuro = Color(0xFF1B5E20)
 
     val salas by salasViewModel.salas.collectAsStateWithLifecycle()
-    val reservationResult by salasViewModel.reservationResult.collectAsStateWithLifecycle()
 
     var turnoSelecionado by remember { mutableStateOf("Manhã") }
     val turnos = listOf("Manhã", "Tarde", "Noite")
     var dropdownAberto by remember { mutableStateOf(false) }
-    var salaParaConfirmar by remember { mutableStateOf<Sala?>(null) }
 
     LaunchedEffect(turnoSelecionado) {
         salasViewModel.fetchSalas(turnoSelecionado)
-    }
-
-    LaunchedEffect(reservationResult) {
-        reservationResult?.let { result ->
-            val message = if(result.isSuccess) "Reservado com Sucesso!" else result.exceptionOrNull()?.message ?: "Erro desconhecido"
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-            salasViewModel.clearReservationResult()
-        }
     }
 
     Scaffold(
@@ -62,6 +53,15 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
                     }
+                },
+                actions = {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = "Logo IFTECA",
+                        modifier = Modifier
+                            .height(40.dp)
+                            .padding(end = 16.dp)
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = verdeEscuro)
             )
@@ -81,8 +81,12 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownAberto) },
                         modifier = Modifier.menuAnchor(),
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.White, unfocusedContainerColor = Color.White,
-                            focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
                         )
                     )
                     ExposedDropdownMenu(expanded = dropdownAberto, onDismissRequest = { dropdownAberto = false }) {
@@ -110,7 +114,7 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
                     items(salas, key = { it.id }) { sala ->
                         SalaCard(sala = sala, onClick = {
                             if (sala.vagasOcupadas < sala.vagasMaximas) {
-                                salaParaConfirmar = sala
+                                navController.navigate("${AppRoutes.HORARIOS_SALA}/${sala.id}/${turnoSelecionado}")
                             } else {
                                 Toast.makeText(context, "Não há vagas para esta sala.", Toast.LENGTH_SHORT).show()
                             }
@@ -119,31 +123,6 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
                 }
             }
         }
-    }
-
-    if (salaParaConfirmar != null) {
-        val sala = salaParaConfirmar!!
-        val hojeFormatado = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-        AlertDialog(
-            onDismissRequest = { salaParaConfirmar = null },
-            title = { Text("Quer Confirmar a reserva?") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Sala: ${sala.nome}", fontWeight = FontWeight.Bold)
-                    Text("Vagas: ${sala.vagasOcupadas}/${sala.vagasMaximas}")
-                    Text("Data: $hojeFormatado")
-                }
-            },
-            confirmButton = {
-                Button(onClick = {
-                    salasViewModel.reservarSala(sala.id, turnoSelecionado)
-                    salaParaConfirmar = null
-                }, colors = ButtonDefaults.buttonColors(containerColor = verdeEscuro)) { Text("Confirmar") }
-            },
-            dismissButton = {
-                Button(onClick = { salaParaConfirmar = null }, colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) { Text("Cancelar") }
-            }
-        )
     }
 }
 
@@ -171,7 +150,7 @@ fun SalaCard(sala: Sala, onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.AccessTime, contentDescription = "Duração", modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(sala.duracao, fontSize = 14.sp)
+                Text("${sala.duracaoPadraoMinutos}min", fontSize = 14.sp)
             }
         }
     }
