@@ -88,7 +88,7 @@ class MainActivity : ComponentActivity() {
                                         } else {
                                             val error = when (task.exception) {
                                                 is FirebaseAuthUserCollisionException -> "Esta matrícula já está cadastrada."
-                                                else -> "Falha no cadastro: Verifique sua conexão e a senha (mínimo 6 caracteres)."
+                                                else -> "Falha no cadastro: verifique sua conexão e a senha (mínimo 6 caracteres)."
                                             }
                                             Toast.makeText(context, error, Toast.LENGTH_LONG).show()
                                         }
