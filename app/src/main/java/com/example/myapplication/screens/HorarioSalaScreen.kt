@@ -112,13 +112,14 @@ fun HorariosSalaScreen(
             Text(
                 "Horários disponíveis para ${sala?.nome ?: "a sala"} em $dataAtualFormatadaExibicao:",
                 fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Black
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             if (horariosDisponiveis.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Nenhum horário disponível para este turno.")
+                    Text("Nenhum horário disponível para este turno.", color = Color.Black)
                 }
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -179,7 +180,7 @@ fun HorariosSalaScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = verdeEscuro)
                 ) {
-                    Text("Confirmar")
+                    Text("Confirmar", color = Color.White)
                 }
             },
             dismissButton = {
@@ -187,7 +188,7 @@ fun HorariosSalaScreen(
                     onClick = { showConfirmDialog = false; horarioSelecionado = null },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
                 ) {
-                    Text("Cancelar")
+                    Text("Cancelar", color = Color.White)
                 }
             }
         )

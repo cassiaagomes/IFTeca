@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,6 +22,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.myapplication.R
 import com.example.myapplication.data.MinhaReserva
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.res.colorResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,7 +38,7 @@ fun ReservasScreen(navController: NavController, viewModel: ReservasViewModel = 
                 title = { Text("Minhas Reservas", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White)
                     }
                 },
                 actions = {
@@ -60,11 +61,11 @@ fun ReservasScreen(navController: NavController, viewModel: ReservasViewModel = 
         ) {
             if (minhasReservas.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Você não possui reservas no momento.")
+                    Text("Você não possui reservas no momento.", color = Color.Black)
                 }
             } else {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Suas reservas ativas:", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Text("Suas reservas ativas:", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
                     Spacer(modifier = Modifier.height(16.dp))
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(minhasReservas, key = { it.id }) { reserva ->
@@ -89,13 +90,13 @@ fun ReservasScreen(navController: NavController, viewModel: ReservasViewModel = 
                         reservaParaCancelar = null
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) { Text("Confirmar") }
+                ) { Text("Confirmar", color = Color.White) }
             },
             dismissButton = {
                 Button(
                     onClick = { reservaParaCancelar = null },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                ) { Text("Voltar") }
+                ) { Text("Voltar", color = Color.White) }
             }
         )
     }
@@ -115,13 +116,13 @@ fun ReservaItem(reserva: MinhaReserva, onCancelClick: () -> Unit) {
         ) {
 
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Sala", color = Color.Gray, fontSize = 12.sp)
-                Text(reserva.nomeSala, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Sala", color = Color.Black, fontSize = 12.sp)
+                Text(reserva.nomeSala, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.DarkGray)
             }
             Column(modifier = Modifier.weight(1.5f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Data e Hora", color = Color.Gray, fontSize = 12.sp)
-                Text("${reserva.data}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text("${reserva.horarioInicio} - ${reserva.horarioFim}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Data e Hora", color = Color.Black, fontSize = 12.sp)
+                Text("${reserva.data}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.DarkGray)
+                Text("${reserva.horarioInicio} - ${reserva.horarioFim}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.DarkGray)
             }
             IconButton(onClick = onCancelClick) {
                 Icon(Icons.Default.Delete, contentDescription = "Cancelar Reserva", tint = Color.Red)
