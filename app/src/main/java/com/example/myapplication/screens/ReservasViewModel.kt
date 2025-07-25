@@ -56,8 +56,18 @@ class ReservasViewModel : ViewModel() {
     fun cancelarReserva(reserva: MinhaReserva) {
         if (userId == null) return
 
+        val dataParaFirebase = try {
+            val inputFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val date = inputFormat.parse(reserva.data)
+            outputFormat.format(date)
+        } catch (e: Exception) {
+            reserva.data
+        }
+
         val updates = mapOf(
-            "/reservas_por_usuario/$userId/${reserva.id}" to null
+            "/reservas_por_usuario/$userId/${reserva.id}" to null,
+            "/reservas_por_sala/${reserva.idSala}/$dataParaFirebase/${reserva.id}" to null
         )
 
         db.reference.updateChildren(updates)
