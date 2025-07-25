@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +27,9 @@ import androidx.navigation.NavController
 import com.example.myapplication.R
 import com.example.myapplication.data.Sala
 import com.example.myapplication.navigation.AppRoutes
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +53,7 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
                 title = { Text("Salas", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White)
                     }
                 },
                 actions = {
@@ -73,28 +75,42 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
             .background(Color(0xFFF5F5F5))
         ) {
             Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Olá,", fontSize = 18.sp)
+                Text("Olá,", fontSize = 18.sp, color = Color.Black)
                 Spacer(modifier = Modifier.weight(1f))
                 ExposedDropdownMenuBox(expanded = dropdownAberto, onExpandedChange = { dropdownAberto = !dropdownAberto }) {
                     TextField(
                         value = turnoSelecionado, onValueChange = {}, readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownAberto) },
-                        modifier = Modifier.menuAnchor(),
+                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
                         colors = TextFieldDefaults.colors(
                             focusedTextColor = Color.Black,
                             unfocusedTextColor = Color.Black,
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White,
                             focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
+                            unfocusedIndicatorColor = Color.Transparent,
                         )
                     )
-                    ExposedDropdownMenu(expanded = dropdownAberto, onDismissRequest = { dropdownAberto = false }) {
-                        turnos.forEach { turno ->
-                            DropdownMenuItem(text = { Text(turno) }, onClick = {
-                                turnoSelecionado = turno
-                                dropdownAberto = false
-                            })
+                    ExposedDropdownMenu(
+                        expanded = dropdownAberto,
+                        onDismissRequest = { dropdownAberto = false },
+                        modifier = Modifier.background(Color.White)
+                    ) {
+                        turnos.forEachIndexed { index, turno ->
+                            DropdownMenuItem(
+                                text = { Text(turno, color = Color.Black) },
+                                onClick = {
+                                    turnoSelecionado = turno
+                                    dropdownAberto = false
+                                }
+                            )
+                            if (index < turnos.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    thickness = 1.dp,
+                                    color = Color.LightGray
+                                )
+                            }
                         }
                     }
                 }
@@ -102,7 +118,7 @@ fun SalasScreen(navController: NavController, salasViewModel: SalasViewModel = v
 
             if (salas.isEmpty()){
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                    Text(text = "Nenhuma sala encontrada para este turno.")
+                    Text(text = "Nenhuma sala encontrada para este turno.", color = Color.Black)
                 }
             } else {
                 LazyVerticalGrid(
@@ -139,7 +155,7 @@ fun SalaCard(sala: Sala, onClick: () -> Unit) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(sala.nome, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(sala.nome, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.Black)
             Text("Vagas", fontSize = 14.sp, color = Color.Gray)
             Text(
                 text = "${sala.vagasOcupadas}/${sala.vagasMaximas}",
@@ -148,9 +164,9 @@ fun SalaCard(sala: Sala, onClick: () -> Unit) {
                 fontSize = 16.sp
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.AccessTime, contentDescription = "Duração", modifier = Modifier.size(16.dp))
+                Icon(Icons.Default.AccessTime, contentDescription = "Duração", modifier = Modifier.size(16.dp), tint = Color.DarkGray)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("${sala.duracaoPadraoMinutos}min", fontSize = 14.sp)
+                Text("${sala.duracaoPadraoMinutos}min", fontSize = 14.sp, color = Color.Black)
             }
         }
     }
