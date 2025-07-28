@@ -1,5 +1,6 @@
 package com.example.myapplication.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,10 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.myapplication.R
 import com.example.myapplication.navigation.AppRoutes
 
 @Composable
@@ -32,7 +35,20 @@ fun MenuScreen(navController: NavController, onLogout: () -> Unit) {
             modifier = Modifier.fillMaxWidth().height(70.dp).background(verdeEscuro).padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterStart
         ) {
-            Text("Menu Principal", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("Menu", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Logo IFTECA",
+                    modifier = Modifier
+                        .height(40.dp)
+                        .padding(end = 8.dp)
+                )
+            }
         }
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),

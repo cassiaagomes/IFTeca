@@ -1,5 +1,6 @@
 package com.example.myapplication.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import androidx.compose.ui.res.painterResource
+import com.example.myapplication.R
 
 @Composable
 fun LoginScreen(
@@ -37,9 +40,30 @@ fun LoginScreen(
     var senhaVisivel by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().background(cinzaClaroFundo)) {
-        Box(modifier = Modifier.fillMaxWidth().height(70.dp).background(verdeEscuro).padding(horizontal = 16.dp), contentAlignment = Alignment.CenterStart) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(70.dp)
+                .background(verdeEscuro)
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
             Text(text = "Login", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Logo IFTECA",
+                    modifier = Modifier
+                        .height(40.dp)
+                        .padding(end = 8.dp)
+                )
+            }
         }
+
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp).padding(top = 48.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "Matrícula", modifier = Modifier.fillMaxWidth(), color = Color.DarkGray, fontWeight = FontWeight.Medium)
             Spacer(modifier = Modifier.height(8.dp))
@@ -101,7 +125,6 @@ fun LoginScreen(
     }
 }
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 640)
 @Composable
 fun DefaultPreview() {
     MyApplicationTheme {

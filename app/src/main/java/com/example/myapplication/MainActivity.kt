@@ -4,20 +4,29 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.myapplication.navigation.AppRoutes
-import com.example.myapplication.screens.LoginScreen
-import com.example.myapplication.screens.MenuScreen
-import com.example.myapplication.screens.ReservasScreen
-import com.example.myapplication.screens.SalasScreen
-import com.example.myapplication.ui.theme.MyApplicationTheme
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
+
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+
+import com.example.myapplication.ui.theme.MyApplicationTheme
+import com.example.myapplication.screens.LoginScreen
+import com.example.myapplication.screens.MenuScreen
+import com.example.myapplication.screens.SalasScreen
+import com.example.myapplication.screens.ReservasScreen
+import com.example.myapplication.screens.HorariosSalaScreen
+import com.example.myapplication.navigation.AppRoutes
 
 class MainActivity : ComponentActivity() {
 
@@ -30,12 +39,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 val navController = rememberNavController()
+                val context = LocalContext.current
 
                 NavHost(navController = navController, startDestination = AppRoutes.LOGIN) {
                     composable(AppRoutes.LOGIN) {
                         var isLoginLoading by remember { mutableStateOf(false) }
                         var isRegisterLoading by remember { mutableStateOf(false) }
-                        val context = LocalContext.current
 
                         LoginScreen(
                             isLoginLoading = isLoginLoading,
@@ -87,6 +96,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+
                     composable(AppRoutes.MENU) {
                         MenuScreen(
                             navController = navController,
@@ -98,8 +108,30 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
+
                     composable(AppRoutes.SALAS) { SalasScreen(navController) }
                     composable(AppRoutes.RESERVAS) { ReservasScreen(navController) }
+
+                    composable(
+                        route = "${AppRoutes.HORARIOS_SALA}/{salaId}/{turno}",
+                        arguments = listOf(
+                            navArgument("salaId") { type = NavType.StringType },
+                            navArgument("turno") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val salaId = backStackEntry.arguments?.getString("salaId")
+                        val turno = backStackEntry.arguments?.getString("turno")
+                        if (salaId != null && turno != null) {
+                            HorariosSalaScreen(
+                                navController = navController,
+                                salaId = salaId,
+                                turnoSelecionado = turno
+                            )
+                        } else {
+                            Toast.makeText(context, "Erro: Detalhes da sala ou turno ausentes.", Toast.LENGTH_SHORT).show()
+                            navController.navigateUp() // Volta para a tela anterior
+                        }
+                    }
                 }
             }
         }

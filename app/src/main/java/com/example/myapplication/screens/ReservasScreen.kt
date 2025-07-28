@@ -1,5 +1,6 @@
 package com.example.myapplication.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,14 +13,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myapplication.R
 import com.example.myapplication.data.MinhaReserva
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.res.colorResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,11 +35,20 @@ fun ReservasScreen(navController: NavController, viewModel: ReservasViewModel = 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Reservas", color = Color.White) },
+                title = { Text("Minhas Reservas", color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White) // Corrigindo para ArrowBack atualizado
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = Color.White)
                     }
+                },
+                actions = {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = "Logo IFTECA",
+                        modifier = Modifier
+                            .height(40.dp)
+                            .padding(end = 16.dp)
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = verdeEscuro)
             )
@@ -48,16 +61,11 @@ fun ReservasScreen(navController: NavController, viewModel: ReservasViewModel = 
         ) {
             if (minhasReservas.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Você não possui reservas.")
+                    Text("Você não possui reservas no momento.", color = Color.Black)
                 }
             } else {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        "Essas são suas reservas:",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.Black
-                    )
+                    Text("Suas reservas ativas:", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
                     Spacer(modifier = Modifier.height(16.dp))
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(minhasReservas, key = { it.id }) { reserva ->
@@ -74,7 +82,7 @@ fun ReservasScreen(navController: NavController, viewModel: ReservasViewModel = 
         AlertDialog(
             onDismissRequest = { reservaParaCancelar = null },
             title = { Text("Cancelar Reserva") },
-            text = { Text("Tem certeza que deseja cancelar a reserva da ${reserva.nomeSala} no dia ${reserva.data}?") },
+            text = { Text("Tem certeza que deseja cancelar a reserva da ${reserva.nomeSala} no dia ${reserva.data} das ${reserva.horarioInicio} às ${reserva.horarioFim}?") },
             confirmButton = {
                 Button(
                     onClick = {
@@ -82,13 +90,13 @@ fun ReservasScreen(navController: NavController, viewModel: ReservasViewModel = 
                         reservaParaCancelar = null
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) { Text("Confirmar") }
+                ) { Text("Confirmar", color = Color.White) }
             },
             dismissButton = {
                 Button(
                     onClick = { reservaParaCancelar = null },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-                ) { Text("Voltar") }
+                ) { Text("Voltar", color = Color.White) }
             }
         )
     }
@@ -106,13 +114,15 @@ fun ReservaItem(reserva: MinhaReserva, onCancelClick: () -> Unit) {
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("Sala", color = Color.Black, fontSize = 12.sp)
                 Text(reserva.nomeSala, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.DarkGray)
             }
             Column(modifier = Modifier.weight(1.5f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Data", color = Color.Black, fontSize = 12.sp)
-                Text("${reserva.data} (${reserva.turno})", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.DarkGray)
+                Text("Data e Hora", color = Color.Black, fontSize = 12.sp)
+                Text("${reserva.data}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.DarkGray)
+                Text("${reserva.horarioInicio} - ${reserva.horarioFim}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.DarkGray)
             }
             IconButton(onClick = onCancelClick) {
                 Icon(Icons.Default.Delete, contentDescription = "Cancelar Reserva", tint = Color.Red)

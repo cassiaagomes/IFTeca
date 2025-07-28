@@ -1,8 +1,9 @@
 package com.example.myapplication.navigation
 
 object AppRoutes {
-    const val LOGIN = "login_screen"
-    const val MENU = "menu_screen"
-    const val SALAS = "salas_screen"
-    const val RESERVAS = "reservas_screen"
+    const val LOGIN = "login"
+    const val MENU = "menu"
+    const val SALAS = "salas"
+    const val RESERVAS = "reservas"
+    const val HORARIOS_SALA = "horarios_sala"
 }
