@@ -4,29 +4,26 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.NavType
-
+import com.example.myapplication.navigation.AppRoutes
+import com.example.myapplication.ui.screens.HorariosSalaScreen
+import com.example.myapplication.ui.screens.LoginScreen
+import com.example.myapplication.ui.screens.MenuScreen
+import com.example.myapplication.ui.screens.ReservasScreen
+import com.example.myapplication.ui.screens.SalasScreen
+import com.example.myapplication.ui.theme.MyApplicationTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-
-import com.example.myapplication.ui.theme.MyApplicationTheme
-import com.example.myapplication.screens.LoginScreen
-import com.example.myapplication.screens.MenuScreen
-import com.example.myapplication.screens.SalasScreen
-import com.example.myapplication.screens.ReservasScreen
-import com.example.myapplication.screens.HorariosSalaScreen
-import com.example.myapplication.navigation.AppRoutes
 
 class MainActivity : ComponentActivity() {
 

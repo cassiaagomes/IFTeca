@@ -1,6 +1,7 @@
-package com.example.myapplication.data
+package com.example.myapplication.data.local.data
 
 data class MinhaReserva(
+    val localId: Int = 0,
     val id: String = "",
     val idSala: String = "",
     val nomeSala: String = "",

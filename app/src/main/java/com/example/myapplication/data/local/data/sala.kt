@@ -1,4 +1,4 @@
-package com.example.myapplication.data
+package com.example.myapplication.data.local.data
 
 data class Sala(
     val id: String = "",
