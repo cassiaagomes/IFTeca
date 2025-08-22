@@ -51,10 +51,12 @@ import androidx.navigation.NavController
 import com.example.myapplication.R
 import com.example.myapplication.data.local.data.MinhaReserva
 import com.example.myapplication.data.local.database.AppDatabase
+import com.example.myapplication.services.Email.EmailService
 import com.example.myapplication.viewmodel.ReservasViewModel
 import com.example.myapplication.viewmodel.ReservasViewModelFactory
 import com.example.myapplication.viewmodel.SalasViewModel
 import com.example.myapplication.viewmodel.SalasViewModelFactory
+import org.koin.compose.koinInject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -71,11 +73,12 @@ fun HorariosSalaScreen(
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val reservaDao = db.reservaDao()
+    val emailService: EmailService = koinInject()
     val salasViewModel: SalasViewModel = viewModel(
         factory = SalasViewModelFactory(reservaDao)
     )
     val reservaViewModel: ReservasViewModel = viewModel(
-        factory = ReservasViewModelFactory(reservaDao)
+        factory = ReservasViewModelFactory(reservaDao, emailService)
     )
     val verdeEscuro = Color(0xFF1B5E20)
 

@@ -86,6 +86,7 @@ dependencies {
     // Koin
     implementation("io.insert-koin:koin-android:3.5.6")
     implementation("io.insert-koin:koin-core:3.5.6")
+    implementation("io.insert-koin:koin-androidx-compose:3.5.6")
 
     // Mail
     implementation("com.sun.mail:android-mail:1.6.7")

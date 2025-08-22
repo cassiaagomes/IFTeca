@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.screens
 
 import android.widget.Toast
+import org.koin.compose.koinInject
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myapplication.services.Email.EmailService
 import com.example.myapplication.data.local.data.MinhaReserva // <-- Usaremos MinhaReserva
 import com.example.myapplication.data.local.database.AppDatabase
 import com.example.myapplication.viewmodel.ReservasViewModelFactory
@@ -33,8 +35,9 @@ fun ReservasScreen(navController: NavController) {
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val reservaDao = db.reservaDao()
+    val emailService: EmailService = koinInject()
     val viewModel: ReservasViewModel = viewModel(
-        factory = ReservasViewModelFactory(reservaDao)
+        factory = ReservasViewModelFactory(reservaDao, emailService)
     )
 
     // CORREÇÃO 2: Usar collectAsStateWithLifecycle para coletar um StateFlow
