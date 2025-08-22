@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -79,7 +80,7 @@ fun SalasScreen(navController: NavController) {
         factory = SalasViewModelFactory(reservaDao)
     )
 
-    val salas by salasViewModel.salas.collectAsStateWithLifecycle()
+    val uiState by salasViewModel.salasUiState.collectAsStateWithLifecycle()
 
     var turnoSelecionado by remember { mutableStateOf("Manhã") }
     val turnos = listOf("Manhã", "Tarde", "Noite")
@@ -166,31 +167,53 @@ fun SalasScreen(navController: NavController) {
                     }
                 }
             }
-
-            if (salas.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Nenhuma sala encontrada para este turno.", color = Color.Black)
+            when {
+                // Estado de Carregamento
+                uiState.isLoading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = verdeEscuro)
+                    }
                 }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(salas, key = { it.id }) { sala ->
-                        SalaCard(sala = sala, onClick = {
-                            if (sala.vagasOcupadas < sala.vagasMaximas) {
-                                navController.navigate("${AppRoutes.HORARIOS_SALA}/${sala.id}/${turnoSelecionado}")
-                            } else {
-                                Toast.makeText(context, "Não há vagas para esta sala.", Toast.LENGTH_SHORT).show()
+                // Estado de Erro
+                uiState.error != null -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = uiState.error!!,
+                            color = Color.Red,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+                // Estado de Sucesso (com ou sem salas)
+                else -> {
+                    if (uiState.salas.isEmpty()) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(text = "Nenhuma sala encontrada para este turno.", color = Color.Black)
+                        }
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            // CORREÇÃO 3: Usar uiState.salas para a lista de itens
+                            items(uiState.salas, key = { it.id }) { sala ->
+                                SalaCard(sala = sala, onClick = {
+                                    if (sala.vagasOcupadas < sala.vagasMaximas) {
+                                        navController.navigate("${AppRoutes.HORARIOS_SALA}/${sala.id}/${turnoSelecionado}")
+                                    } else {
+                                        Toast.makeText(context, "Não há vagas para esta sala.", Toast.LENGTH_SHORT).show()
+                                    }
+                                })
                             }
-                        })
+                        }
                     }
                 }
             }
         }
-    }
+
+        }
 }
 
 @Composable

@@ -1,12 +1,11 @@
 package com.example.myapplication.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.local.dao.ReservaDao
-import com.example.myapplication.data.local.data.MinhaReserva
 import com.example.myapplication.data.local.data.Sala
-import com.example.myapplication.data.local.mappers.toMinhaReserva
+import com.example.myapplication.data.local.entity.ReservaEntity
+import com.example.myapplication.ui.state.SalasUiState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -20,57 +19,46 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 class SalasViewModel(
-    private val reservaDao: ReservaDao // injetar DAO do Room
+    private val reservaDao: ReservaDao
 ) : ViewModel() {
 
     private val db = FirebaseDatabase.getInstance()
     private val auth = FirebaseAuth.getInstance()
-    private val _reservasDaSala = MutableStateFlow<List<MinhaReserva>>(emptyList())
-    val reservasDaSala: StateFlow<List<MinhaReserva>> = _reservasDaSala
 
-    private val _salas = MutableStateFlow<List<Sala>>(emptyList())
-    val salas: StateFlow<List<Sala>> = _salas
+    private val _salasUiState = MutableStateFlow(SalasUiState())
+    val salasUiState: StateFlow<SalasUiState> = _salasUiState
+
+    private val _reservasDaSala = MutableStateFlow<List<ReservaEntity>>(emptyList())
+    val reservasDaSala: StateFlow<List<ReservaEntity>> = _reservasDaSala
+
 
     private val _salaSelecionada = MutableStateFlow<Sala?>(null)
     val salaSelecionada: StateFlow<Sala?> = _salaSelecionada
 
     fun fetchSalas(turno: String) {
+        _salasUiState.value = SalasUiState(isLoading = true)
+
         val hojeFormatado = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
-        Log.d("FirebaseDebug", "Iniciando fetchSalas para o turno: '$turno'")
 
         db.getReference("salas").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshotSalas: DataSnapshot) {
-                // LOG 1: Aconteceu a conexão? O Firebase retornou algo?
-                Log.d("FirebaseDebug", "onDataChange foi chamado. Snapshot existe: ${snapshotSalas.exists()}. Filhos: ${snapshotSalas.childrenCount}")
-
                 val salasBase = snapshotSalas.children.mapNotNull { salaSnapshot ->
                     salaSnapshot.getValue(Sala::class.java)?.copy(id = salaSnapshot.key ?: "")
                 }
-                // LOG 2: Quantas salas foram convertidas do JSON com sucesso?
-                Log.d("FirebaseDebug", "Número de salas ANTES do filtro de turno: ${salasBase.size}")
 
                 val salasDoTurno = salasBase.filter {
-                    // LOG 3: Verificando cada sala
-                    Log.d("FirebaseDebug", "Verificando sala '${it.nome}' com turnos: ${it.turnosDisponiveis}. Contém '$turno'? ${it.turnosDisponiveis.contains(turno)}")
                     it.turnosDisponiveis.contains(turno)
                 }
-                // LOG 4: Quantas salas sobraram DEPOIS do filtro?
-                Log.d("FirebaseDebug", "Número de salas DEPOIS do filtro de turno: ${salasDoTurno.size}")
 
                 if (salasDoTurno.isEmpty()) {
-                    _salas.value = emptyList()
-                    Log.w("FirebaseDebug", "Nenhuma sala encontrada para o turno. A lista ficará vazia.")
+                    _salasUiState.value = SalasUiState(isLoading = false, salas = emptyList())
                     return
                 }
 
                 viewModelScope.launch(Dispatchers.IO) {
                     val reservasDoDia = reservaDao.getReservasDoDia(hojeFormatado)
-                    // LOG 5: Encontrou reservas no SQLite?
-                    Log.d("FirebaseDebug", "Encontradas ${reservasDoDia.size} reservas no SQLite para a data $hojeFormatado")
 
-                    // ... o resto da sua lógica de contagem de vagas ...
                     val salasComVagas = salasDoTurno.map { sala ->
                         val vagasOcupadas = reservasDoDia.count { reserva ->
                             val horaInicio = reserva.horarioInicio.split(":")[0].toIntOrNull() ?: 0
@@ -87,18 +75,52 @@ class SalasViewModel(
                     }
 
                     launch(Dispatchers.Main) {
-                        // LOG 6: A lista final está sendo enviada para a UI.
-                        Log.d("FirebaseDebug", "Atualizando a UI com ${salasComVagas.size} salas.")
-                        _salas.value = salasComVagas.sortedBy { it.nome }
+                        _salasUiState.value = SalasUiState(
+                            isLoading = false,
+                            salas = salasComVagas.sortedBy { it.nome }
+                        )
                     }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // LOG 7: O Firebase retornou um erro?
-                Log.e("FirebaseDebug", "ERRO GRAVE ao buscar salas: ${error.message}")
+                _salasUiState.value = SalasUiState(
+                    isLoading = false,
+                    error = "Falha ao carregar salas: ${error.message}"
+                )
             }
         })
+    }
+
+    private fun fetchReservasParaSalaEData(
+        salaId: String,
+        data: String,
+        callback: (List<ReservaEntity>) -> Unit
+    ) {
+        val reservasRef = db.getReference("reservas")
+
+        reservasRef.orderByChild("idSala").equalTo(salaId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val reservas = snapshot.children.mapNotNull { reservaSnapshot ->
+                        val reserva = reservaSnapshot.getValue(ReservaEntity::class.java)
+                        if (reserva != null && reserva.data == data) reserva else null
+                    }
+                    callback(reservas)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    callback(emptyList())
+                }
+            })
+    }
+
+
+
+    fun carregarReservasDaSala(salaId: String, dataFirebaseFormat: String) {
+        fetchReservasParaSalaEData(salaId, dataFirebaseFormat) { reservas ->
+            _reservasDaSala.value = reservas
+        }
     }
 
     fun fetchSalaById(salaId: String) {
@@ -118,42 +140,8 @@ class SalasViewModel(
             }
 
             override fun onCancelled(error: DatabaseError) {
-                println("Erro ao buscar sala por ID: ${error.message}")
                 _salaSelecionada.value = null
             }
         })
     }
-    fun carregarReservasDaSala(salaId: String, data: String) {
-        viewModelScope.launch {
-            reservaDao.getReservasPorSalaEData(salaId, data).collect { listaDeEntities ->
-                // Usamos .map para converter cada item da lista
-                val listaDeMinhasReservas = listaDeEntities.map { entity ->
-                    entity.toMinhaReserva()
-                }
-                // Agora o tipo da lista é List<MinhaReserva>, que é o tipo correto!
-                _reservasDaSala.value = listaDeMinhasReservas
-            }
-        }
-    }
-
-
-    fun fetchReservasParaSalaEData(salaId: String, dataFirebaseFormat: String, callback: (List<MinhaReserva>) -> Unit) {
-        db.getReference("reservas_por_sala/$salaId/$dataFirebaseFormat")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val reservas = mutableListOf<MinhaReserva>()
-                    snapshot.children.forEach { reservaSnapshot ->
-                        val reserva = reservaSnapshot.getValue(MinhaReserva::class.java)
-                        reserva?.let { reservas.add(it) }
-                    }
-                    callback(reservas)
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    println("Erro ao buscar reservas para sala $salaId e data $dataFirebaseFormat: ${error.message}")
-                    callback(emptyList())
-                }
-            })
-    }
 }
-
