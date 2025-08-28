@@ -69,6 +69,8 @@ class ReservasViewModel(
         })
     }
 
+// Em ReservasViewModel.kt
+
     fun salvarNovaReserva(novaReserva: MinhaReserva, onResult: (Boolean) -> Unit) {
         if (userId == null) {
             onResult(false)
@@ -76,33 +78,28 @@ class ReservasViewModel(
         }
 
         Log.d("ReservaSync", "Iniciando salvamento no Firebase...")
-        // Use um formato de data consistente para o Firebase (yyyy-MM-dd é bom para ordenação)
-        val dataParaFirebase = try {
-            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
-                SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(novaReserva.data)!!
-            )
-        } catch (e: Exception) {
-            // Fallback em caso de erro de parse, embora improvável
-            novaReserva.data.split("/").reversed().joinToString("-")
-        }
+        val dataParaFirebase = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
         val updates = mapOf(
             "/reservas_por_usuario/$userId/${novaReserva.id}" to novaReserva,
             "/reservas_por_sala/${novaReserva.idSala}/$dataParaFirebase/${novaReserva.id}" to novaReserva
         )
 
+        // Tenta escrever no Firebase
         db.reference.updateChildren(updates)
             .addOnSuccessListener {
-                Log.d("ReservaSync", "Sucesso ao salvar no Firebase. Agora, salvando no cache SQLite...")
+                // CORREÇÃO: REMOVEMOS A ESCRITA REDUNDANTE NO SQLITE DAQUI
+                Log.d("ReservaSync", "Sucesso ao salvar no Firebase. O ouvinte irá sincronizar com o SQLite.")
+
+                // Apenas enviamos o e-mail e notificamos a UI sobre o sucesso.
                 viewModelScope.launch {
                     try {
-                        reservaDao.salvar(novaReserva.toReservaEntity())
-                        emailService.enviarEmailConfirmacao(novaReserva, emailDeTeste) // Envia o e-mail
-                        Log.d("ReservaSync", "Sucesso ao salvar no cache SQLite e enviar e-mail.")
+                        emailService.enviarEmailConfirmacao(novaReserva, emailDeTeste)
+                        Log.d("EmailDebug", "E-mail de confirmação enviado.")
                         onResult(true)
                     } catch (e: Exception) {
-                        Log.e("ReservaSync", "Firebase OK, mas falha ao salvar no SQLite ou enviar e-mail!", e)
-                        onResult(false)
+                        Log.e("EmailDebug", "Firebase OK, mas falha ao enviar e-mail.", e)
+                        onResult(true) // A reserva foi feita, então o resultado ainda é sucesso.
                     }
                 }
             }
