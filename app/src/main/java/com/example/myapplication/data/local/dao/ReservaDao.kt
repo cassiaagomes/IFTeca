@@ -27,4 +27,12 @@ interface ReservaDao {
 
     @Query("SELECT * FROM reservas WHERE data = :data")
     suspend fun getReservasDoDia(data: String): List<ReservaEntity>
+
+    // Deleta todas as reservas de um usuário específico
+    @Query("DELETE FROM reservas WHERE idUsuario = :usuarioId")
+    suspend fun deletarReservasDoUsuario(usuarioId: String)
+
+    // Insere uma lista de reservas de uma vez (mais eficiente)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun salvarLista(reservas: List<ReservaEntity>)
 }
